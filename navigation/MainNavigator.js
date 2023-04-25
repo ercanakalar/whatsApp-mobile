@@ -8,6 +8,15 @@ import ChatListScreen from "../screens/ChatListScreen";
 import ChatScreen from "../screens/ChatScreen";
 import NewChatScreen from "../screens/NewChatScreen";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { getFirebaseApp } from "../utils/firebaseHelper";
+import { child, getDatabase, off, onValue, ref } from "firebase/database";
+import { setChatsData } from "../store/chatSlice";
+import { useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import colors from "../constants/colors";
+import commonStyles from "../constants/commonStyles";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -42,9 +51,9 @@ const TabNavigator = () => {
   );
 };
 
-const MainNavigator = (props) => {
+const StackNavigator = () => {
   return (
-    <Stack.Navigator>
+     <Stack.Navigator>
       <Stack.Group>
         <Stack.Screen
           name="Home"
@@ -76,6 +85,74 @@ const MainNavigator = (props) => {
         />
       </Stack.Group>
     </Stack.Navigator>
+  )
+}
+
+const MainNavigator = (props) => {
+  const dispatch = useDispatch()
+
+  const [isLoading, setIsLoading] = useState(true)
+
+  const userData  = useSelector(state => state.auth.userData)
+  const storedUsers = useSelector(state => state.users.users)
+
+  useEffect(() => {
+    console.log("Subscribed to users")
+
+    const app = getFirebaseApp()
+    const dbRef = ref(getDatabase(app))
+    const userCharRef = child(dbRef, `userChats/${userData.userId}`)
+    const refs = [userCharRef]
+
+    onValue(userCharRef, (querySnapshot) => {
+      const chatIdsData = querySnapshot.val() || {}
+      const chatIds = Object.keys(chatIdsData)
+
+      const chatsData = {}
+      let chatsFoundCount = 0
+
+      for(let i = 0; i < chatIds.length; i++) {
+        const chatId = chatIds[i]
+        const chatRef = child(dbRef, `chats/${chatId}`)
+        refs.push(chatRef)
+
+        onValue(chatRef, (chatSnapshot) => {
+          chatsFoundCount++
+
+          const data = chatSnapshot.val() || {}
+          if(data) {
+            data.key = chatSnapshot.key
+
+            chatsData[chatSnapshot.key] = data
+          }
+
+          if(chatsFoundCount >= chatIds.length) {
+            dispatch(setChatsData({chatsData}))
+            setIsLoading(false)
+          }
+        })
+
+        if(chatsFoundCount === 0) setIsLoading(false)
+      }
+
+      console.log(chatIds)
+    })
+
+    return () => {
+      console.log("Unsubscribed to users")
+      refs.forEach(ref => off(ref))
+    }
+
+  },[])
+
+  if(isLoading) {
+    <View style={commonStyles.center}>
+      <ActivityIndicator size="large" color={colors.primary} />
+    </View>
+  }
+
+  return (
+   <StackNavigator/>
   );
 };
 

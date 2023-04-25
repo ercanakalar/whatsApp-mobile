@@ -32,7 +32,6 @@ export const searchUsers = async (queryText) => {
 
         return {};
     } catch (error) {
-        console.log(error,'searchUsers');
         throw error;
     }
 }
