@@ -11,15 +11,11 @@ export const createChat = async (loggedInUserId, chatData) => {
         updatedAt: new Date().toISOString()
     };
 
-    if (!chatData?.users) {
-        throw new Error("chatData.users is null. Throwing error");
-    }
-
     const app = getFirebaseApp();
     const dbRef = ref(getDatabase(app));
     const newChat = await push(child(dbRef, 'chats'), newChatData);
 
-    const chatUsers = newChatData?.users;
+    const chatUsers = newChatData.users;
     for (let i = 0; i < chatUsers.length; i++) {
         const userId = chatUsers[i];
         await push(child(dbRef, `userChats/${userId}`), newChat.key);
