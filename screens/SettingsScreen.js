@@ -21,10 +21,10 @@ const SettingsScreen = props => {
     const [showSuccessMessage, setShowSuccessMessage] = useState(false);
     const userData = useSelector(state => state.auth.userData);
     
-    const firstName = userData?.firstName || "";
-    const lastName = userData?.lastName || "";
-    const email = userData?.email || "";
-    const about = userData?.about || "";
+    const firstName = userData.firstName || "";
+    const lastName = userData.lastName || "";
+    const email = userData.email || "";
+    const about = userData.about || "";
 
     const initialState = {
         inputValues: {
@@ -54,7 +54,7 @@ const SettingsScreen = props => {
         
         try {
             setIsLoading(true);
-            await updateSignedInUserData(userData?.userId, updatedValues);
+            await updateSignedInUserData(userData.userId, updatedValues);
             dispatch(updateLoggedInUserData({newData: updatedValues}));
 
             setShowSuccessMessage(true);
@@ -86,8 +86,8 @@ const SettingsScreen = props => {
 
             <ProfileImage
                 size={80}
-                userId={userData?.userId}
-                uri={userData?.profilePicture}
+                userId={userData.userId}
+                uri={userData.profilePicture}
                 showEditButton={true} />
 
             <Input
@@ -98,7 +98,7 @@ const SettingsScreen = props => {
                 onInputChanged={inputChangedHandler}
                 autoCapitalize="none"
                 errorText={formState.inputValidities["firstName"]}
-                initialValue={userData?.firstName} />
+                initialValue={userData.firstName} />
 
             <Input
                 id="lastName"
@@ -108,7 +108,7 @@ const SettingsScreen = props => {
                 onInputChanged={inputChangedHandler}
                 autoCapitalize="none"
                 errorText={formState.inputValidities["lastName"]}
-                initialValue={userData?.lastName} />
+                initialValue={userData.lastName} />
 
             <Input
                 id="email"
@@ -119,7 +119,7 @@ const SettingsScreen = props => {
                 keyboardType="email-address"
                 autoCapitalize="none"
                 errorText={formState.inputValidities["email"]}
-                initialValue={userData?.email} />
+                initialValue={userData.email} />
 
             <Input
                 id="about"
@@ -129,7 +129,7 @@ const SettingsScreen = props => {
                 onInputChanged={inputChangedHandler}
                 autoCapitalize="none"
                 errorText={formState.inputValidities["about"]}
-                initialValue={userData?.about} />
+                initialValue={userData.about} />
 
             <View style={{ marginTop: 20 }}>
                 {
